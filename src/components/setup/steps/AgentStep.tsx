@@ -23,6 +23,7 @@ const AGENT_DESCRIPTIONS: Record<string, string> = {
   codex: "OpenAI's coding agent",
   opencode: 'Open-source coding agent',
   cursor: "Cursor's coding agent",
+  kimi: "Moonshot AI's coding agent",
 };
 
 interface AgentStepProps {

@@ -124,6 +124,23 @@ export const CURSOR: AgentConfig = {
   installHint: 'Make sure Cursor CLI is installed: curl https://cursor.com/install -fsS | bash',
 };
 
+/** Kimi Code CLI agent configuration. */
+export const KIMI_CODE: AgentConfig = {
+  id: 'kimi-code',
+  displayName: 'Kimi Code',
+  binaryName: 'kimi',
+  processName: 'kimi',
+  autoAcceptFlag: '--yolo',
+  additionalDirFlag: '--add-dir',
+  supportsSkills: false,
+  supportsMcp: false,
+  supportsStatusDetection: false,
+  loadingMessage: 'Starting Kimi Code...',
+  notFoundMessage: 'Error starting Kimi Code',
+  installHint:
+    'Make sure Kimi Code is installed: curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash',
+};
+
 /** Raw terminal (shell) configuration — not an AI agent. */
 export const TERMINAL: AgentConfig = {
   id: 'terminal',
@@ -162,10 +179,17 @@ export async function getUserShell(): Promise<string> {
 }
 
 /** All available agents (AI coding assistants). */
-export const ALL_AGENTS: AgentConfig[] = [CLAUDE_CODE, CODEX, OPENCODE, CURSOR];
+export const ALL_AGENTS: AgentConfig[] = [CLAUDE_CODE, CODEX, OPENCODE, CURSOR, KIMI_CODE];
 
 /** All options available in the tab dropdown (agents + terminal). */
-export const ALL_TAB_OPTIONS: AgentConfig[] = [CLAUDE_CODE, CODEX, OPENCODE, CURSOR, TERMINAL];
+export const ALL_TAB_OPTIONS: AgentConfig[] = [
+  CLAUDE_CODE,
+  CODEX,
+  OPENCODE,
+  CURSOR,
+  KIMI_CODE,
+  TERMINAL,
+];
 
 /** In-memory cache for the default agent ID. Null means unset (falls back to Claude Code). */
 let defaultAgentId: string | null = null;

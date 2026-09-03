@@ -294,13 +294,12 @@ export function buildGuidedSetupPrompt(
 
 /**
  * How to launch each agent CLI as an interactive session seeded with a
- * prompt. Verified against each CLI's --help: claude, codex and cursor-agent
- * take the initial prompt as a positional argument; opencode's positional is
- * a project directory, so it takes `--prompt` instead.
+ * prompt. Claude, Codex and cursor-agent take the initial prompt positionally;
+ * Opencode and Kimi expose a dedicated `--prompt` flag.
  */
 export function guidedAgentSpawn(agentBinaryId: string, prompt: string): TerminalCommand {
-  if (agentBinaryId === 'opencode') {
-    return { command: 'opencode', args: ['--prompt', prompt] };
+  if (agentBinaryId === 'opencode' || agentBinaryId === 'kimi') {
+    return { command: agentBinaryId, args: ['--prompt', prompt] };
   }
   const binary = agentBinaryId === 'cursor' ? 'cursor-agent' : agentBinaryId;
   return { command: binary, args: [prompt] };

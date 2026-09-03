@@ -46,6 +46,7 @@ import {
   ClaudeIcon,
   CodexIcon,
   CursorIcon,
+  KimiIcon,
   GitHubIcon,
   OpencodeIcon,
   VercelIcon,
@@ -118,6 +119,9 @@ function iconFor(agentId: string) {
   }
   if (agentId === 'cursor') {
     return <CursorIcon size={18} />;
+  }
+  if (agentId === 'kimi-code') {
+    return <KimiIcon size={18} />;
   }
   return <GenericAgentIcon size={18} />;
 }

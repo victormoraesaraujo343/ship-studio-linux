@@ -77,13 +77,15 @@ const ALL_ITEMS: &[&str] = &[
     "opencode_auth",
     "cursor",
     "cursor_auth",
+    "kimi",
+    "kimi_auth",
     "vercel",
     "vercel_auth",
 ];
 
 /// Tool items (not auth)
 const TOOL_ITEMS: &[&str] = &[
-    "homebrew", "node", "git", "gh", "claude", "codex", "opencode", "cursor", "vercel",
+    "homebrew", "node", "git", "gh", "claude", "codex", "opencode", "cursor", "kimi", "vercel",
 ];
 
 // ============ App State Persistence (shared helpers) ============
@@ -212,6 +214,8 @@ fn get_scenario_items(scenario: &str) -> Vec<&'static str> {
                     && item != "opencode_auth"
                     && item != "cursor"
                     && item != "cursor_auth"
+                    && item != "kimi"
+                    && item != "kimi_auth"
             })
             .copied()
             .collect(),
@@ -226,6 +230,8 @@ fn get_scenario_items(scenario: &str) -> Vec<&'static str> {
                     && item != "codex_auth"
                     && item != "cursor"
                     && item != "cursor_auth"
+                    && item != "kimi"
+                    && item != "kimi_auth"
             })
             .copied()
             .collect(),
@@ -434,25 +440,28 @@ mod tests {
     }
 
     #[test]
-    fn all_items_contains_15_items_including_all_agents_and_vercel() {
-        assert_eq!(ALL_ITEMS.len(), 15);
+    fn all_items_contains_17_items_including_all_agents_and_vercel() {
+        assert_eq!(ALL_ITEMS.len(), 17);
         assert!(ALL_ITEMS.contains(&"codex"));
         assert!(ALL_ITEMS.contains(&"codex_auth"));
         assert!(ALL_ITEMS.contains(&"opencode"));
         assert!(ALL_ITEMS.contains(&"opencode_auth"));
         assert!(ALL_ITEMS.contains(&"cursor"));
         assert!(ALL_ITEMS.contains(&"cursor_auth"));
+        assert!(ALL_ITEMS.contains(&"kimi"));
+        assert!(ALL_ITEMS.contains(&"kimi_auth"));
         assert!(ALL_ITEMS.contains(&"vercel"));
         assert!(ALL_ITEMS.contains(&"vercel_auth"));
     }
 
     #[test]
-    fn tool_items_contains_9_items_including_all_agents_and_vercel() {
-        assert_eq!(TOOL_ITEMS.len(), 9);
+    fn tool_items_contains_10_items_including_all_agents_and_vercel() {
+        assert_eq!(TOOL_ITEMS.len(), 10);
         assert!(TOOL_ITEMS.contains(&"codex"));
         assert!(TOOL_ITEMS.contains(&"claude"));
         assert!(TOOL_ITEMS.contains(&"opencode"));
         assert!(TOOL_ITEMS.contains(&"cursor"));
+        assert!(TOOL_ITEMS.contains(&"kimi"));
         assert!(TOOL_ITEMS.contains(&"vercel"));
     }
 

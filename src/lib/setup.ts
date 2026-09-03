@@ -128,6 +128,8 @@ export const OPTIONAL_ITEMS = new Set([
   'opencode_auth',
   'cursor',
   'cursor_auth',
+  'kimi',
+  'kimi_auth',
   'vercel',
   'vercel_auth',
 ]);
@@ -155,6 +157,7 @@ export const WORKSPACE_LOGIN_ITEM_IDS = new Set([
   'codex_auth',
   'opencode_auth',
   'cursor_auth',
+  'kimi_auth',
   'vercel_auth',
 ]);
 
@@ -170,6 +173,7 @@ export const MACHINE_ITEM_IDS = new Set([
   'codex',
   'opencode',
   'cursor',
+  'kimi',
   'vercel',
 ]);
 
@@ -206,6 +210,8 @@ export function getSetupDependencies(): Record<string, string[]> {
     opencode_auth: ['opencode'],
     cursor: [], // Uses its own installer (native, not npm)
     cursor_auth: ['cursor'],
+    kimi: [], // Uses its own installer (native, not npm)
+    kimi_auth: ['kimi'],
     vercel: ['node'], // npm global install — fails with a misleading error without Node
     vercel_auth: ['vercel'],
   };
@@ -232,6 +238,8 @@ export const SETUP_ITEM_ORDER = [
   'opencode_auth',
   'cursor',
   'cursor_auth',
+  'kimi',
+  'kimi_auth',
   'vercel',
   'vercel_auth',
 ];
@@ -254,6 +262,8 @@ export const SETUP_FRIENDLY_NAMES: Record<string, string> = {
   opencode_auth: 'Opencode Account',
   cursor: 'Cursor',
   cursor_auth: 'Cursor Account',
+  kimi: 'Kimi Code',
+  kimi_auth: 'Kimi Account',
   vercel: 'Vercel CLI',
   vercel_auth: 'Vercel Account',
 };
@@ -276,6 +286,8 @@ export const SETUP_PROGRESS_MESSAGES: Record<string, string> = {
   opencode_auth: 'Connecting to Opencode...',
   cursor: 'Installing Cursor...',
   cursor_auth: 'Connecting to Cursor...',
+  kimi: 'Installing Kimi Code...',
+  kimi_auth: 'Connecting to Kimi...',
   vercel: 'Installing Vercel CLI...',
   vercel_auth: 'Connecting to Vercel...',
 };
@@ -298,6 +310,8 @@ export const SETUP_TIME_ESTIMATES: Record<string, string> = {
   opencode_auth: '~15 sec',
   cursor: '~10 sec',
   cursor_auth: '~15 sec',
+  kimi: '~10 sec',
+  kimi_auth: '~15 sec',
   vercel: '~10 sec',
   vercel_auth: '~15 sec',
 };
@@ -310,6 +324,7 @@ export const AGENT_ITEM_PAIRS = [
   { binaryId: 'codex', authId: 'codex_auth' },
   { binaryId: 'opencode', authId: 'opencode_auth' },
   { binaryId: 'cursor', authId: 'cursor_auth' },
+  { binaryId: 'kimi', authId: 'kimi_auth' },
 ] as const;
 
 /** Agent item IDs (all binary + auth IDs) */
@@ -327,6 +342,11 @@ export const AGENT_DOC_LINKS: { binaryId: string; name: string; url: string }[] 
   { binaryId: 'codex', name: 'Codex', url: 'https://github.com/openai/codex' },
   { binaryId: 'opencode', name: 'opencode', url: 'https://opencode.ai/docs/' },
   { binaryId: 'cursor', name: 'Cursor CLI', url: 'https://cursor.com/docs/cli/overview' },
+  {
+    binaryId: 'kimi',
+    name: 'Kimi Code',
+    url: 'https://www.kimi.com/code/docs/en/kimi-code-cli/guides/getting-started.html',
+  },
 ];
 
 /**
@@ -472,6 +492,8 @@ export const WIZARD_STEPS: WizardStepDef[] = [
       'opencode_auth',
       'cursor',
       'cursor_auth',
+      'kimi',
+      'kimi_auth',
     ],
     skippable: false,
   },
@@ -1013,6 +1035,17 @@ export function getTerminalCommands(): Record<string, TerminalCommand> {
         command: 'cursor-agent',
         args: ['login'],
       },
+      kimi: {
+        command: 'powershell',
+        args: [
+          '-Command',
+          'Write-Host "Downloading the Kimi Code installer..." ; irm https://code.kimi.com/kimi-code/install.ps1 | iex',
+        ],
+      },
+      kimi_auth: {
+        command: 'kimi',
+        args: ['login', '--region', 'global'],
+      },
       vercel: {
         // --force clears EEXIST failures from stale/partial global installs.
         command: 'npm',
@@ -1132,6 +1165,17 @@ export function getTerminalCommands(): Record<string, TerminalCommand> {
         command: 'cursor-agent',
         args: ['login'],
       },
+      kimi: {
+        command: '/bin/bash',
+        args: [
+          '-c',
+          'echo "Downloading the Kimi Code installer…" && curl -fSL --progress-bar https://code.kimi.com/kimi-code/install.sh | bash',
+        ],
+      },
+      kimi_auth: {
+        command: 'kimi',
+        args: ['login', '--region', 'global'],
+      },
       vercel: {
         // --force clears EEXIST failures from stale/partial global installs.
         command: '/bin/bash',
@@ -1179,6 +1223,8 @@ export function getUsesTerminal(): Set<string> {
     'opencode_auth',
     'cursor',
     'cursor_auth',
+    'kimi',
+    'kimi_auth',
     'vercel',
     'vercel_auth',
   ];

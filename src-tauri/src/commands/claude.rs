@@ -171,6 +171,7 @@ fn candidate_paths_for(binary_name: &str) -> Vec<std::path::PathBuf> {
                     exe_name
                 )),
                 home.join(format!(r".local\bin\{}", exe_name)),
+                home.join(format!(r".kimi-code\bin\{}", exe_name)),
                 // Node version managers / alt package managers not on the GUI
                 // PATH (issue #242: "installed but shows as not installed").
                 home.join(format!(r".volta\bin\{}", exe_name)),
@@ -243,6 +244,7 @@ fn candidate_paths_for(binary_name: &str) -> Vec<std::path::PathBuf> {
                 home.join(format!(".npm-global/bin/{binary_name}")),
                 home.join(format!("n/bin/{binary_name}")),
                 home.join(format!(".{binary_name}/bin/{binary_name}")),
+                home.join(format!(".kimi-code/bin/{binary_name}")),
                 home.join(format!(".bun/bin/{binary_name}")),
                 // Node version managers / alt package managers not on the GUI
                 // PATH (issue #242: "installed but shows as not installed").
@@ -513,6 +515,13 @@ mod tests {
         // Should include at least one entry — at minimum the built-in fallbacks
         // even on a machine without a `claude` install.
         assert!(!paths.is_empty());
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn candidate_paths_for_includes_kimi_installer_location() {
+        let home = dirs::home_dir().expect("home dir");
+        assert!(candidate_paths_for("kimi").contains(&home.join(".kimi-code/bin/kimi")));
     }
 
     #[cfg(not(windows))]

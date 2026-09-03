@@ -44,7 +44,7 @@ import {
   OnboardingTestMode,
 } from '../../../lib/agentOnboarding';
 import { initDefaultAgent, getAgentById } from '../../../lib/agent';
-import { ClaudeIcon, CodexIcon, CursorIcon, OpencodeIcon } from '../../icons';
+import { ClaudeIcon, CodexIcon, CursorIcon, KimiIcon, OpencodeIcon } from '../../icons';
 import { usePolling } from '../../../hooks/usePolling';
 import { withTimeout, TimeoutError } from '../../../lib/withTimeout';
 import { trackEvent, trackPageview } from '../../../lib/analytics';
@@ -60,7 +60,9 @@ let agentSetupStartedFired = false;
 
 /** Agent-config id for a setup pair's binary id (claude → claude-code). */
 function agentIdForBinary(binaryId: string): string {
-  return binaryId === 'claude' ? 'claude-code' : binaryId;
+  if (binaryId === 'claude') return 'claude-code';
+  if (binaryId === 'kimi') return 'kimi-code';
+  return binaryId;
 }
 
 const DETAIL_ICONS: Record<string, ReactNode> = {
@@ -68,6 +70,7 @@ const DETAIL_ICONS: Record<string, ReactNode> = {
   codex: <CodexIcon size={28} />,
   cursor: <CursorIcon size={28} />,
   opencode: <OpencodeIcon size={28} />,
+  kimi: <KimiIcon size={28} />,
 };
 
 interface AgentOnboardingScreenProps {

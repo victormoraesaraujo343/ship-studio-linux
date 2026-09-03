@@ -15,6 +15,7 @@ import {
   CLAUDE_CODE,
   CODEX,
   OPENCODE,
+  KIMI_CODE,
   TERMINAL,
 } from './agent';
 
@@ -48,6 +49,10 @@ describe('getAgentById', () => {
     const agent = getAgentById('terminal');
     expect(agent.id).toBe('terminal');
     expect(agent.displayName).toBe('Terminal');
+  });
+
+  it('returns KIMI_CODE for "kimi-code"', () => {
+    expect(getAgentById('kimi-code')).toBe(KIMI_CODE);
   });
 
   it('falls back to CLAUDE_CODE for unknown ID', () => {
@@ -99,18 +104,24 @@ describe('getActiveAgent', () => {
 // ============ ALL_AGENTS / ALL_TAB_OPTIONS ============
 
 describe('ALL_AGENTS', () => {
-  it('has exactly 4 entries', () => {
-    expect(ALL_AGENTS).toHaveLength(4);
+  it('has exactly 5 entries', () => {
+    expect(ALL_AGENTS).toHaveLength(5);
   });
 
-  it('contains CLAUDE_CODE, CODEX, OPENCODE, and CURSOR', () => {
-    expect(ALL_AGENTS.map((a) => a.id)).toEqual(['claude-code', 'codex', 'opencode', 'cursor']);
+  it('contains all supported coding agents', () => {
+    expect(ALL_AGENTS.map((a) => a.id)).toEqual([
+      'claude-code',
+      'codex',
+      'opencode',
+      'cursor',
+      'kimi-code',
+    ]);
   });
 });
 
 describe('ALL_TAB_OPTIONS', () => {
-  it('has exactly 5 entries (agents + terminal)', () => {
-    expect(ALL_TAB_OPTIONS).toHaveLength(5);
+  it('has exactly 6 entries (agents + terminal)', () => {
+    expect(ALL_TAB_OPTIONS).toHaveLength(6);
   });
 
   it('contains CLAUDE_CODE, CODEX, OPENCODE, CURSOR, and TERMINAL', () => {
@@ -119,6 +130,7 @@ describe('ALL_TAB_OPTIONS', () => {
       'codex',
       'opencode',
       'cursor',
+      'kimi-code',
       'terminal',
     ]);
   });
@@ -136,11 +148,12 @@ describe('AgentConfig fields', () => {
     expect(CLAUDE_CODE.supportsStatusDetection).toBe(true);
   });
 
-  it('only Claude Code exposes an additional-directory flag (others null)', () => {
+  it('keeps additional-directory support explicit per agent', () => {
     // Attached libraries ride in via this flag; agents without an equivalent
     // must be null so the launch wiring treats them as a no-op.
     expect(CODEX.additionalDirFlag).toBeNull();
     expect(OPENCODE.additionalDirFlag).toBeNull();
+    expect(KIMI_CODE.additionalDirFlag).toBe('--add-dir');
     expect(TERMINAL.additionalDirFlag).toBeNull();
   });
 
@@ -158,6 +171,13 @@ describe('AgentConfig fields', () => {
     expect(OPENCODE.autoAcceptFlag).toBeNull();
     expect(OPENCODE.supportsSkills).toBe(false);
     expect(OPENCODE.supportsStatusDetection).toBe(false);
+  });
+
+  it('KIMI_CODE uses the installed kimi CLI contract', () => {
+    expect(KIMI_CODE.binaryName).toBe('kimi');
+    expect(KIMI_CODE.autoAcceptFlag).toBe('--yolo');
+    expect(KIMI_CODE.supportsSkills).toBe(false);
+    expect(KIMI_CODE.supportsMcp).toBe(false);
   });
 
   it('TERMINAL has correct specific values', () => {

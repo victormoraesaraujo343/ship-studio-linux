@@ -15,6 +15,7 @@ const AUTH_TOOL_LABELS: Record<string, string> = {
   codex_auth: 'Codex',
   opencode_auth: 'Opencode',
   cursor_auth: 'Cursor',
+  kimi_auth: 'Kimi',
   gh_auth: 'GitHub',
 };
 

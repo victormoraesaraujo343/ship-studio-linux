@@ -4,7 +4,7 @@
 //! flags, auth indicators, etc.) are centralized here so the rest of the codebase
 //! is agent-agnostic.
 //!
-//! Supports multiple agents (Claude Code, Codex). The default agent is persisted
+//! Supports multiple coding agents. The default agent is persisted
 //! in AppState and cached in-memory via a RwLock for fast access.
 
 use std::sync::RwLock;
@@ -183,8 +183,39 @@ pub const CURSOR: AgentConfig = AgentConfig {
     logout_args: Some(&["logout"]),
 };
 
+/// Kimi Code CLI configuration for the global kimi.ai service.
+pub const KIMI_CODE: AgentConfig = AgentConfig {
+    id: "kimi-code",
+    display_name: "Kimi Code",
+    binary_name: "kimi",
+    process_name: "kimi",
+    version_flag: "--version",
+    print_mode_flags: &["-p"],
+    auto_accept_flag: Some("--yolo"),
+    auth_trigger_args: &["login", "--region", "global"],
+    auth_config_dir: ".kimi-code",
+    // Kimi always creates config.toml; the credential file specifically proves login.
+    auth_indicators: &["oauth/kimi-code"],
+    skills_agent_id: None,
+    skills_dir_name: None,
+    install_command_unix: Some("curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash"),
+    install_message_windows: Some("irm https://code.kimi.com/kimi-code/install.ps1 | iex"),
+    // Preserve configuration and credentials when removing only the executable.
+    uninstall_command_unix: Some(
+        "rm -f \"$HOME/.kimi-code/bin/kimi\" 2>/dev/null; echo Uninstalled.",
+    ),
+    uninstall_command_windows: Some(
+        "del /q \"%USERPROFILE%\\.kimi-code\\bin\\kimi.exe\" 2>nul & echo Uninstalled.",
+    ),
+    setup_item_ids: ("kimi", "kimi_auth"),
+    setup_display_names: ("Kimi Code", "Kimi Account"),
+    auth_status_args: None,
+    auth_status_ready_substr: None,
+    logout_args: None,
+};
+
 /// All available agent configurations.
-pub const ALL_AGENTS: &[&AgentConfig] = &[&CLAUDE_CODE, &CODEX, &OPENCODE, &CURSOR];
+pub const ALL_AGENTS: &[&AgentConfig] = &[&CLAUDE_CODE, &CODEX, &OPENCODE, &CURSOR, &KIMI_CODE];
 
 /// In-memory cache for the default agent ID. `None` means unset (falls back to Claude Code).
 static DEFAULT_AGENT_ID: RwLock<Option<String>> = RwLock::new(None);
@@ -221,6 +252,7 @@ pub fn get_agent_by_id(id: &str) -> &'static AgentConfig {
         "codex" => &CODEX,
         "opencode" => &OPENCODE,
         "cursor" => &CURSOR,
+        "kimi-code" => &KIMI_CODE,
         _ => &CLAUDE_CODE,
     }
 }
@@ -255,8 +287,16 @@ mod tests {
     }
 
     #[test]
-    fn all_agents_has_length_4() {
-        assert_eq!(ALL_AGENTS.len(), 4);
+    fn all_agents_has_length_5() {
+        assert_eq!(ALL_AGENTS.len(), 5);
+    }
+
+    #[test]
+    fn get_agent_by_id_kimi_code() {
+        let agent = get_agent_by_id("kimi-code");
+        assert_eq!(agent.binary_name, "kimi");
+        assert_eq!(agent.auth_trigger_args, &["login", "--region", "global"]);
+        assert_eq!(agent.auth_indicators, &["oauth/kimi-code"]);
     }
 
     #[test]

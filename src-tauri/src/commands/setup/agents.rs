@@ -92,6 +92,26 @@ pub async fn agent_command_auth_status_with_timeout(
     }
 }
 
+/// Check file-backed authentication, including provider-specific metadata.
+/// A Kimi OAuth token from kimi.com is not valid evidence for the requested
+/// kimi.ai integration, so its persisted region must also be `global`.
+pub fn agent_file_auth_status(account_id: &str, agent: &crate::agent::AgentConfig) -> bool {
+    let dir = agent_auth_dir(account_id, agent);
+    agent_file_auth_status_in_dir(&dir, agent)
+}
+
+fn agent_file_auth_status_in_dir(dir: &std::path::Path, agent: &crate::agent::AgentConfig) -> bool {
+    let has_credential = agent
+        .auth_indicators
+        .iter()
+        .any(|indicator| dir.join(indicator).exists());
+    if !has_credential || agent.id != "kimi-code" {
+        return has_credential;
+    }
+
+    std::fs::read_to_string(dir.join("region")).is_ok_and(|region| region.trim() == "global")
+}
+
 /// Return the status of every known agent in a single call.
 /// Avoids the N round-trips the dashboard would otherwise need.
 #[tauri::command]
@@ -141,11 +161,7 @@ pub async fn get_agents_status() -> Vec<AgentStatus> {
                 // Keychain-based agents (Cursor): ask the CLI, not the filesystem.
                 (authed, None, false)
             } else {
-                let dir = agent_auth_dir(&active_account_id, agent);
-                let authed = agent
-                    .auth_indicators
-                    .iter()
-                    .any(|indicator| dir.join(indicator).exists());
+                let authed = agent_file_auth_status(&active_account_id, agent);
                 (authed, None, false)
             };
 
@@ -279,6 +295,26 @@ pub async fn uninstall_agent(agent_id: String) -> Result<String, CommandError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn kimi_auth_requires_oauth_and_global_region() {
+        let tmp = tempfile::tempdir().expect("temp dir");
+        let oauth_dir = tmp.path().join("oauth");
+        std::fs::create_dir_all(&oauth_dir).expect("oauth dir");
+        std::fs::write(oauth_dir.join("kimi-code"), "secret-not-read").expect("oauth marker");
+
+        std::fs::write(tmp.path().join("region"), "mainland-cn\n").expect("region");
+        assert!(!agent_file_auth_status_in_dir(
+            tmp.path(),
+            &crate::agent::KIMI_CODE
+        ));
+
+        std::fs::write(tmp.path().join("region"), "global\n").expect("region");
+        assert!(agent_file_auth_status_in_dir(
+            tmp.path(),
+            &crate::agent::KIMI_CODE
+        ));
+    }
 
     // ============ sign_out_agent ============
 

@@ -149,6 +149,13 @@ describe('guidedAgentSpawn', () => {
       args: ['--prompt', 'PROMPT'],
     });
   });
+
+  it('uses --prompt for Kimi Code', () => {
+    expect(guidedAgentSpawn('kimi', 'PROMPT')).toEqual({
+      command: 'kimi',
+      args: ['--prompt', 'PROMPT'],
+    });
+  });
 });
 
 describe('getMissingRequiredItems', () => {

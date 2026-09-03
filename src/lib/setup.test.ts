@@ -344,7 +344,7 @@ describe('isAtLeastOneAgentReady', () => {
 // ============ AGENT_ITEM_IDS ============
 
 describe('AGENT_ITEM_IDS', () => {
-  it('contains all 8 agent item IDs', () => {
+  it('contains all 10 agent item IDs', () => {
     expect(AGENT_ITEM_IDS.has('claude')).toBe(true);
     expect(AGENT_ITEM_IDS.has('claude_auth')).toBe(true);
     expect(AGENT_ITEM_IDS.has('codex')).toBe(true);
@@ -353,7 +353,9 @@ describe('AGENT_ITEM_IDS', () => {
     expect(AGENT_ITEM_IDS.has('opencode_auth')).toBe(true);
     expect(AGENT_ITEM_IDS.has('cursor')).toBe(true);
     expect(AGENT_ITEM_IDS.has('cursor_auth')).toBe(true);
-    expect(AGENT_ITEM_IDS.size).toBe(8);
+    expect(AGENT_ITEM_IDS.has('kimi')).toBe(true);
+    expect(AGENT_ITEM_IDS.has('kimi_auth')).toBe(true);
+    expect(AGENT_ITEM_IDS.size).toBe(10);
   });
 
   it('does not contain non-agent items', () => {
@@ -425,6 +427,8 @@ describe('SETUP_FRIENDLY_NAMES', () => {
     expect(SETUP_FRIENDLY_NAMES.claude_auth).toBe('Claude Account');
     expect(SETUP_FRIENDLY_NAMES.codex).toBe('Codex');
     expect(SETUP_FRIENDLY_NAMES.codex_auth).toBe('Codex Account');
+    expect(SETUP_FRIENDLY_NAMES.kimi).toBe('Kimi Code');
+    expect(SETUP_FRIENDLY_NAMES.kimi_auth).toBe('Kimi Account');
     expect(SETUP_FRIENDLY_NAMES.vercel).toBe('Vercel CLI');
     expect(SETUP_FRIENDLY_NAMES.vercel_auth).toBe('Vercel Account');
   });
@@ -458,6 +462,8 @@ describe('TERMINAL_COMMANDS', () => {
     expect(TERMINAL_COMMANDS.opencode_auth.args).toEqual(['auth', 'login']);
     expect(TERMINAL_COMMANDS.cursor_auth.command).toBe('cursor-agent');
     expect(TERMINAL_COMMANDS.cursor_auth.args).toEqual(['login']);
+    expect(TERMINAL_COMMANDS.kimi_auth.command).toBe('kimi');
+    expect(TERMINAL_COMMANDS.kimi_auth.args).toEqual(['login', '--region', 'global']);
   });
 
   it('has vercel entry', () => {

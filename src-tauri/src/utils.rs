@@ -300,6 +300,7 @@ fn build_extended_path() -> String {
             windows_paths.push(format!("{}\\AppData\\Local\\Programs\\Git\\bin", home_str));
             windows_paths.push(format!("{}\\AppData\\Roaming\\npm", home_str));
             windows_paths.push(format!(r"{}\.local\bin", home_str));
+            windows_paths.push(format!(r"{}\.kimi-code\bin", home_str));
             // pnpm's self-managed install dir ($PNPM_HOME, default
             // %LOCALAPPDATA%\pnpm) — see the Unix branch (issue #570).
             for dir in pnpm_home_dirs(&home, std::env::var("PNPM_HOME").ok().as_deref()) {
@@ -325,6 +326,7 @@ fn build_extended_path() -> String {
         paths.push(format!("{home_str}/.npm-global/bin"));
         paths.push(format!("{home_str}/.local/bin")); // Official Claude installer location
         paths.push(format!("{home_str}/.opencode/bin")); // Opencode installer location
+        paths.push(format!("{home_str}/.kimi-code/bin")); // Kimi Code installer location
         paths.push(format!("{home_str}/.bun/bin")); // Bun-installed tools
         paths.push(format!("{home_str}/n/bin"));
         // pnpm's self-managed install dirs (standalone installer / `pnpm

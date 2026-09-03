@@ -6,10 +6,11 @@
 use super::{is_force_onboarding_mode, is_mock_installed, is_mock_mode, read_app_state};
 use crate::agent::ALL_AGENTS;
 use crate::commands::accounts::{
-    agent_auth_dir, get_active_account_id, get_env_vars_for_account, DEFAULT_ACCOUNT_ID,
+    get_active_account_id, get_env_vars_for_account, DEFAULT_ACCOUNT_ID,
 };
 use crate::commands::claude::find_binary_by_name;
 use crate::commands::github::get_gh_command;
+use crate::commands::setup::agents::agent_file_auth_status;
 use crate::errors::CommandError;
 use crate::external_command::run_with_timeout;
 use crate::types::{FullSetupStatus, OptionalAuths, SetupItemInfo, SetupItemStatus};
@@ -132,6 +133,8 @@ pub async fn get_full_setup_status() -> FullSetupStatus {
             ("opencode_auth", "Opencode Account", Some("opencode")),
             ("cursor", "Cursor", None),
             ("cursor_auth", "Cursor Account", Some("cursor")),
+            ("kimi", "Kimi Code", None),
+            ("kimi_auth", "Kimi Account", Some("kimi")),
             ("vercel", "Vercel CLI", None),
             ("vercel_auth", "Vercel Account", Some("vercel")),
         ];
@@ -626,11 +629,7 @@ pub async fn get_full_setup_status() -> FullSetupStatus {
             // Keychain-based agents (Cursor): ask the CLI, not the filesystem.
             authed
         } else {
-            let agent_dir = agent_auth_dir(&active_account_id, agent);
-            agent.auth_indicators.iter().any(|indicator| {
-                let path = agent_dir.join(indicator);
-                path.exists()
-            })
+            agent_file_auth_status(&active_account_id, agent)
         };
         items.push(SetupItemInfo {
             id: agent.setup_item_ids.1.to_string(),
@@ -663,11 +662,7 @@ pub async fn get_full_setup_status() -> FullSetupStatus {
             // the CLI status check is the same answer for every account.
             authed
         } else {
-            let agent_dir = agent_auth_dir(crate::commands::accounts::DEFAULT_ACCOUNT_ID, agent);
-            agent
-                .auth_indicators
-                .iter()
-                .any(|indicator| agent_dir.join(indicator).exists())
+            agent_file_auth_status(crate::commands::accounts::DEFAULT_ACCOUNT_ID, agent)
         };
 
         if binary_ready && agent_auth_global {
@@ -800,11 +795,7 @@ pub async fn quick_setup_check() -> crate::types::QuickSetupCheck {
             // Same resolver as the full setup check — it has agent-specific
             // directory mappings (claude/codex/opencode), so the quick and
             // full checks can never disagree about auth state.
-            let agent_dir = agent_auth_dir(&quick_account_id, agent);
-            agent
-                .auth_indicators
-                .iter()
-                .any(|indicator| agent_dir.join(indicator).exists())
+            agent_file_auth_status(&quick_account_id, agent)
         });
 
     // For gh_auth, we trust the cached state since checking requires subprocess

@@ -213,6 +213,7 @@ export function OnboardingTerminal({ command, args, cwd, onExit }: OnboardingTer
             `${appData}\\npm`,
             `${localAppData}\\pnpm`,
             `${homeNormalized}.cargo\\bin`,
+            `${homeNormalized}.kimi-code\\bin`,
             `${programFiles}\\GitHub CLI`,
             `${programFiles}\\Git\\cmd`,
             `${programFiles}\\nodejs`,
@@ -251,6 +252,7 @@ export function OnboardingTerminal({ command, args, cwd, onExit }: OnboardingTer
             `${homeNormalized}.cargo/bin`,
             `${homeNormalized}n/bin`, // n version manager
             `${homeNormalized}.opencode/bin`, // opencode installer default
+            `${homeNormalized}.kimi-code/bin`, // Kimi Code installer default
             `${homeNormalized}.bun/bin`, // bun-installed tools
           ];
 

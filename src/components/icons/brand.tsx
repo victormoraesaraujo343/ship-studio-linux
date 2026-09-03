@@ -113,6 +113,21 @@ export function OpencodeIcon({ size = 16 }: IconProps) {
   );
 }
 
+/** Kimi Code mark, kept monochrome so it follows the surrounding UI color. */
+export function KimiIcon({ size = 16 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5 4.5v15M19 4.5 10.5 12 19 19.5M8.5 4.5v15"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function SlackIcon({ size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">

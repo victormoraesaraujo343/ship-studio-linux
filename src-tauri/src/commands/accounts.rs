@@ -500,6 +500,17 @@ pub fn codex_home_dir(account_id: &str) -> PathBuf {
     private_account_subdir(account_id, "codex")
 }
 
+/// Directory used as `KIMI_CODE_HOME` for this account, created on access.
+/// Default preserves the user's global Kimi login; named workspaces are isolated.
+pub fn kimi_code_home_dir(account_id: &str) -> PathBuf {
+    if account_id == DEFAULT_ACCOUNT_ID {
+        return std::env::var("KIMI_CODE_HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| dirs::home_dir().unwrap_or_default().join(".kimi-code"));
+    }
+    private_account_subdir(account_id, "kimi-code")
+}
+
 /// Directory used as `XDG_DATA_HOME` for this account, created on access.
 ///
 /// The Default account resolves to the real, global data directory (honoring
@@ -529,6 +540,7 @@ pub fn agent_auth_dir(account_id: &str, agent: &AgentConfig) -> PathBuf {
         "claude-code" => claude_config_dir(account_id),
         "codex" => codex_home_dir(account_id),
         "opencode" => opencode_data_home_dir(account_id).join("opencode"),
+        "kimi-code" => kimi_code_home_dir(account_id),
         _ => account_config_root(account_id).join(agent.auth_config_dir),
     }
 }
@@ -632,6 +644,10 @@ pub fn get_env_vars_for_account(account_id: &str) -> HashMap<String, String> {
             opencode_data_home_dir(account_id)
                 .to_string_lossy()
                 .to_string(),
+        );
+        vars.insert(
+            "KIMI_CODE_HOME".to_string(),
+            kimi_code_home_dir(account_id).to_string_lossy().to_string(),
         );
 
         // Per-workspace Claude login. Unlike the CLI config dirs above, Claude
@@ -1898,6 +1914,7 @@ mod tests {
         assert!(vars.contains_key("GH_CONFIG_DIR"));
         assert!(vars.contains_key("CODEX_HOME"));
         assert!(vars.contains_key("XDG_DATA_HOME"));
+        assert!(vars.contains_key("KIMI_CODE_HOME"));
         // No credentials stored for this account, so no token vars. Claude's
         // per-workspace token is only injected once the workspace connects.
         assert!(!vars.contains_key("VERCEL_TOKEN"));
@@ -1915,6 +1932,7 @@ mod tests {
         assert!(!vars.contains_key("CLAUDE_CONFIG_DIR"));
         assert!(!vars.contains_key("CODEX_HOME"));
         assert!(!vars.contains_key("XDG_DATA_HOME"));
+        assert!(!vars.contains_key("KIMI_CODE_HOME"));
         // The Default workspace uses Claude's native keychain login, never an
         // injected token — injecting one would override the user's real login.
         assert!(!vars.contains_key("CLAUDE_CODE_OAUTH_TOKEN"));
