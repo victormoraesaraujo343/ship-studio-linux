@@ -194,8 +194,10 @@ pub const KIMI_CODE: AgentConfig = AgentConfig {
     auto_accept_flag: Some("--yolo"),
     auth_trigger_args: &["login", "--region", "global"],
     auth_config_dir: ".kimi-code",
-    // Kimi always creates config.toml; the credential file specifically proves login.
-    auth_indicators: &["oauth/kimi-code"],
+    // Kimi stores dynamically-named JSON credentials in this directory. Its
+    // provider-aware status check additionally verifies the exact credential
+    // referenced by config.toml and the kimi.ai endpoints.
+    auth_indicators: &["credentials"],
     skills_agent_id: None,
     skills_dir_name: None,
     install_command_unix: Some("curl -fsSL https://code.kimi.com/kimi-code/install.sh | bash"),
@@ -296,7 +298,7 @@ mod tests {
         let agent = get_agent_by_id("kimi-code");
         assert_eq!(agent.binary_name, "kimi");
         assert_eq!(agent.auth_trigger_args, &["login", "--region", "global"]);
-        assert_eq!(agent.auth_indicators, &["oauth/kimi-code"]);
+        assert_eq!(agent.auth_indicators, &["credentials"]);
     }
 
     #[test]

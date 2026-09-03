@@ -93,23 +93,51 @@ pub async fn agent_command_auth_status_with_timeout(
 }
 
 /// Check file-backed authentication, including provider-specific metadata.
-/// A Kimi OAuth token from kimi.com is not valid evidence for the requested
-/// kimi.ai integration, so its persisted region must also be `global`.
 pub fn agent_file_auth_status(account_id: &str, agent: &crate::agent::AgentConfig) -> bool {
     let dir = agent_auth_dir(account_id, agent);
     agent_file_auth_status_in_dir(&dir, agent)
 }
 
 fn agent_file_auth_status_in_dir(dir: &std::path::Path, agent: &crate::agent::AgentConfig) -> bool {
-    let has_credential = agent
-        .auth_indicators
-        .iter()
-        .any(|indicator| dir.join(indicator).exists());
-    if !has_credential || agent.id != "kimi-code" {
-        return has_credential;
+    if agent.id == "kimi-code" {
+        return kimi_global_auth_status(dir);
     }
 
-    std::fs::read_to_string(dir.join("region")).is_ok_and(|region| region.trim() == "global")
+    agent
+        .auth_indicators
+        .iter()
+        .any(|indicator| dir.join(indicator).exists())
+}
+
+/// Kimi may leave its legacy `region` file unchanged when `login --region
+/// global` migrates an existing installation. The generated config is the
+/// authoritative source: it selects the kimi.ai endpoints and names the exact
+/// JSON credential under `credentials/`.
+fn kimi_global_auth_status(dir: &std::path::Path) -> bool {
+    let Ok(config) = std::fs::read_to_string(dir.join("config.toml")) else {
+        return false;
+    };
+
+    if !config.contains("https://api.kimi.ai/") || !config.contains("https://auth.kimi.ai") {
+        return false;
+    }
+
+    config.lines().any(|line| {
+        let Some(credential_name) = line
+            .trim()
+            .strip_prefix("key = \"oauth/")
+            .and_then(|value| value.strip_suffix('"'))
+        else {
+            return false;
+        };
+
+        !credential_name.is_empty()
+            && !credential_name.contains(['/', '\\'])
+            && dir
+                .join("credentials")
+                .join(format!("{credential_name}.json"))
+                .is_file()
+    })
 }
 
 /// Return the status of every known agent in a single call.
@@ -297,20 +325,67 @@ mod tests {
     use super::*;
 
     #[test]
-    fn kimi_auth_requires_oauth_and_global_region() {
+    fn kimi_auth_uses_global_config_and_its_referenced_credential() {
         let tmp = tempfile::tempdir().expect("temp dir");
-        let oauth_dir = tmp.path().join("oauth");
-        std::fs::create_dir_all(&oauth_dir).expect("oauth dir");
-        std::fs::write(oauth_dir.join("kimi-code"), "secret-not-read").expect("oauth marker");
+        let credentials_dir = tmp.path().join("credentials");
+        std::fs::create_dir_all(&credentials_dir).expect("credentials dir");
+        std::fs::write(tmp.path().join("region"), "mainland-cn\n").expect("legacy region");
+        std::fs::write(
+            tmp.path().join("config.toml"),
+            r#"
+base_url = "https://api.kimi.ai/coding/v1"
+[providers."managed:kimi-code".oauth]
+key = "oauth/kimi-code-env-test"
+oauth_host = "https://auth.kimi.ai"
+"#,
+        )
+        .expect("global config");
 
-        std::fs::write(tmp.path().join("region"), "mainland-cn\n").expect("region");
+        // Global endpoints alone are insufficient: the referenced token must exist.
         assert!(!agent_file_auth_status_in_dir(
             tmp.path(),
             &crate::agent::KIMI_CODE
         ));
 
-        std::fs::write(tmp.path().join("region"), "global\n").expect("region");
+        std::fs::write(
+            credentials_dir.join("kimi-code-env-test.json"),
+            "secret-not-read",
+        )
+        .expect("credential");
         assert!(agent_file_auth_status_in_dir(
+            tmp.path(),
+            &crate::agent::KIMI_CODE
+        ));
+
+        // The stale legacy region file must not override the provider config.
+        assert_eq!(
+            std::fs::read_to_string(tmp.path().join("region")).expect("legacy region"),
+            "mainland-cn\n"
+        );
+    }
+
+    #[test]
+    fn kimi_auth_rejects_mainland_provider_even_with_credentials() {
+        let tmp = tempfile::tempdir().expect("temp dir");
+        let credentials_dir = tmp.path().join("credentials");
+        std::fs::create_dir_all(&credentials_dir).expect("credentials dir");
+        std::fs::write(
+            tmp.path().join("config.toml"),
+            r#"
+base_url = "https://api.moonshot.cn/v1"
+[providers."managed:kimi-code".oauth]
+key = "oauth/kimi-code-mainland"
+oauth_host = "https://auth.moonshot.cn"
+"#,
+        )
+        .expect("mainland config");
+        std::fs::write(
+            credentials_dir.join("kimi-code-mainland.json"),
+            "secret-not-read",
+        )
+        .expect("credential");
+
+        assert!(!agent_file_auth_status_in_dir(
             tmp.path(),
             &crate::agent::KIMI_CODE
         ));
