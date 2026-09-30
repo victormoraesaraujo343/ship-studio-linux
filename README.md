@@ -22,6 +22,45 @@
 > [website](https://www.ship.studio/). Report bugs there — anything broken here
 > I most likely broke myself.
 >
+> **What it really changes** (checked against upstream on 2026-09-30). The fork
+> branched from upstream `main` at `fce29b9` (2026-08-16, v0.18.6):
+>
+> - **Linux onboarding** installs missing tools through the distro's package
+>   manager (`apt-get`, `dnf`, `pacman` or `zypper`).
+> - **Terminals** start the user's own shell instead of a hard-coded
+>   `/bin/zsh`, and the shell probes also work in fish.
+> - **AppImage (x86_64)**, built by `.github/workflows/release-linux.yml` on
+>   `v*-linux` tags, on Ubuntu 22.04 so it runs on older glibc. Plus fixes so
+>   the bundle does not ship the host's graphics libraries and spawned
+>   processes get the host's libraries. No auto-update on Linux: the updater
+>   still points at upstream's release feed.
+> - **GitLab next to GitHub**, through `glab`: connect an account (also
+>   self-hosted instances), list, create, merge, check out and close merge
+>   requests. The app follows the project's real forge and remote instead of
+>   assuming GitHub and `origin`.
+> - **Analytics and error reports are off by default**, so a build of this
+>   fork does not report to upstream's dashboard.
+> - **Plugin `panel` slot**: a plugin can own a whole workspace tab.
+> - Smaller fixes: branch switching uses `git switch`; never send a signal to
+>   pid 0.
+>
+> Releases: `v0.18.6-linux`, `v0.18.7-linux` and `v0.18.8-linux` (latest,
+> 2026-09-01), each with an AppImage.
+>
+> **Branches**
+>
+> - `main` (default) — everything above. Last change 2026-08-31.
+> - `feature/linux-adaptation` — the Linux + GitLab work. Fully merged into
+>   `main`; nothing there that `main` lacks.
+> - `plugin-panel-slot` — the `panel` slot and its plan
+>   (`docs/internal/plugin-drawer-plan.md`). Also merged into `main`.
+>
+> There is no upstream sync branch, and upstream has not been merged since the
+> fork point: upstream `main` is 346 commits ahead (v1.4.0).
+>
+> **Related repo:** `ship-studio-plugins` (private) — my own plugins for this
+> build; its `pedidos` plugin uses the `panel` slot.
+>
 > The README below is the original project's, kept as it came.
 
 ---
